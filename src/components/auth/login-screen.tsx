@@ -54,7 +54,7 @@ export default function LoginScreen() {
                 <Card className="shadow-xl sm:w-full md:-full lg:w-92 flex justify-center">
                     <CardHeader className="flex flex-col items-center justify-center">
                         <div className="w-full flex justify-center items-center">
-                            <img src="public/semear.png" className="h-32 w-32 text-blue-600" alt="Logo"/>
+                            <img src="/semear.png" className="h-32 w-32 text-blue-600" alt="Logo"/>
                         </div>
                         <CardTitle className="text-center">Acesso ao Sistema</CardTitle>
                         <CardDescription className="text-center">Entre com suas credenciais para acessar o

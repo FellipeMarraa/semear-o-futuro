@@ -60,7 +60,7 @@ export default function Dashboard() {
                                     <Menu className="h-6 w-6" />
                                 )}
                             </button>
-                            <img src="public/semear.png" className="w-20 text-blue-600 mr-3 hidden sm:block"  alt="Logo"/>
+                            <img src="/semear.png" className="w-20 text-blue-600 mr-3 hidden sm:block"  alt="Logo"/>
                             <div>
                                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Sistema de Controle</h1>
                                 <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Gerenciamento de cadastros</p>
@@ -92,7 +92,7 @@ export default function Dashboard() {
                 )}
             >
                 <div className="flex items-center justify-center mt-5 mb-0">
-                    <img src="public/semear.png" className="w-20 text-blue-600 mr-3"  alt="Logo"/>
+                    <img src="/semear.png" className="w-20 text-blue-600 mr-3"  alt="Logo"/>
                 </div>
                 <div className="p-4 mt-0">
                     {tabs.map((tab) => (
