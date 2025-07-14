@@ -22,7 +22,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle
-} from "../ui/alert-dialog"
+} from "@/components/ui/alert-dialog"
 
 export default function FamilyList() {
     const [families, setFamilies] = useState<Family[]>([])
