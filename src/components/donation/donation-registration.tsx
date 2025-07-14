@@ -96,6 +96,7 @@ export default function DonationRegistration() {
         responsible: "",
         observations: "",
       })
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast({
         title: "Erro ao registrar doação",
@@ -163,107 +164,112 @@ export default function DonationRegistration() {
           </div>
         </CardContent>
       </Card>
+      {formData.familyName && (
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Dados da Doação</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="donationType">Tipo da Doação *</Label>
+                    <Select
+                        value={formData.donationType}
+                        onValueChange={(value) => setFormData((prev) => ({ ...prev, donationType: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo de doação" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {donationTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity">Quantidade/Descrição *</Label>
+                    <Input
+                        id="quantity"
+                        value={formData.quantity}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
+                        placeholder="Ex: 5kg, 10 unidades, 1 cesta básica"
+                        required
+                    />
+                  </div>
+                </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Dados da Doação</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="donationType">Tipo da Doação *</Label>
-              <Select
-                value={formData.donationType}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, donationType: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo de doação" />
-                </SelectTrigger>
-                <SelectContent>
-                  {donationTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="quantity">Quantidade/Descrição *</Label>
-              <Input
-                id="quantity"
-                value={formData.quantity}
-                onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
-                placeholder="Ex: 5kg, 10 unidades, 1 cesta básica"
-                required
-              />
-            </div>
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Data da Doação *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                            variant="outline"
+                            className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !formData.date && "text-muted-foreground",
+                            )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.date ? format(formData.date, "PPP", { locale: ptBR }) : "Selecione a data"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                            mode="single"
+                            selected={formData.date}
+                            onSelect={(date) => setFormData((prev) => ({ ...prev, date: date || new Date() }))}
+                            initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="responsible">Responsável pela Entrega *</Label>
+                    <Input
+                        id="responsible"
+                        value={formData.responsible}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, responsible: e.target.value }))}
+                        placeholder="Nome do responsável"
+                        required
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Data da Doação *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.date && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date ? format(formData.date, "PPP", { locale: ptBR }) : "Selecione a data"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={(date) => setFormData((prev) => ({ ...prev, date: date || new Date() }))}
-                    initialFocus
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Observações</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Label htmlFor="observations">Observações da Doação</Label>
+                  <Textarea
+                      id="observations"
+                      value={formData.observations}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, observations: e.target.value }))}
+                      placeholder="Ex: Família não estava em casa, doação recusada, necessidades específicas atendidas, etc."
+                      rows={4}
                   />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="responsible">Responsável pela Entrega *</Label>
-              <Input
-                id="responsible"
-                value={formData.responsible}
-                onChange={(e) => setFormData((prev) => ({ ...prev, responsible: e.target.value }))}
-                placeholder="Nome do responsável"
-                required
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                </div>
+              </CardContent>
+            </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Observações</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="observations">Observações da Doação</Label>
-            <Textarea
-              id="observations"
-              value={formData.observations}
-              onChange={(e) => setFormData((prev) => ({ ...prev, observations: e.target.value }))}
-              placeholder="Ex: Família não estava em casa, doação recusada, necessidades específicas atendidas, etc."
-              rows={4}
-            />
-          </div>
-        </CardContent>
-      </Card>
+            <div className="flex justify-end">
+              <Button type="submit" size="lg" className="min-w-[150px]" disabled={!formData.familyId || loading}>
+                <Save className="h-4 w-4 mr-2" />
+                {loading ? "Registrando..." : "Registrar Doação"}
+              </Button>
+            </div>
 
-      <div className="flex justify-end">
-        <Button type="submit" size="lg" className="min-w-[150px]" disabled={!formData.familyId || loading}>
-          <Save className="h-4 w-4 mr-2" />
-          {loading ? "Registrando..." : "Registrar Doação"}
-        </Button>
-      </div>
+          </>
+      )}
+
     </form>
   )
 }

@@ -7,7 +7,7 @@ import {Label} from "@/components/ui/label"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Badge} from "@/components/ui/badge"
-import {Calendar, Edit, Eye, Filter, Gift, MapPin, Phone, Search, Trash2, Users, X} from "lucide-react"
+import {Calendar, Edit, Eye, Filter, MapPin, Phone, Search, Trash2, Users, X} from "lucide-react"
 import {differenceInDays, format} from "date-fns"
 import {ptBR} from "date-fns/locale"
 import {deleteFamily, subscribeFamilies, updateFamily} from "@/lib/firestore.ts"
@@ -15,6 +15,14 @@ import type {Family} from "@/types"
 import {cn} from "@/lib/utils.ts";
 import {Separator} from "@/components/ui/separator.tsx";
 import {useToast} from "@/components/ui/use-toast.ts";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle
+} from "../ui/alert-dialog"
 
 export default function FamilyList() {
     const [families, setFamilies] = useState<Family[]>([])
@@ -28,6 +36,9 @@ export default function FamilyList() {
     const [editingFamily, setEditingFamily] = useState<Partial<Family>>({
         members: []
     })
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+    const [familyToDelete, setFamilyToDelete] = useState<Family | null>(null)
+
     const {toast} = useToast()
 
     useEffect(() => {
@@ -84,20 +95,28 @@ export default function FamilyList() {
     }
 
     const handleDelete = async (family: Family) => {
-        if (window.confirm(`Deseja realmente excluir a família de ${family.responsibleName}?`)) {
-            try {
-                await deleteFamily(family.id)
-                toast({
-                    title: "Família excluída",
-                    description: "Registro removido com sucesso",
-                })
-            } catch (error) {
-                toast({
-                    title: "Erro ao excluir",
-                    description: "Não foi possível excluir a família" + error,
-                    variant: "destructive",
-                })
-            }
+        setFamilyToDelete(family)
+        setOpenDeleteDialog(true)
+    }
+
+    const confirmDelete = async () => {
+        if (!familyToDelete) return
+
+        try {
+            await deleteFamily(familyToDelete.id)
+            toast({
+                title: "Família excluída",
+                description: "Registro removido com sucesso",
+            })
+        } catch (error) {
+            toast({
+                title: "Erro ao excluir",
+                description: "Não foi possível excluir a família" + error,
+                variant: "destructive",
+            })
+        } finally {
+            setOpenDeleteDialog(false)
+            setFamilyToDelete(null)
         }
     }
 
@@ -107,12 +126,15 @@ export default function FamilyList() {
         try {
             const updates = Object.entries(editingFamily).reduce((acc, [key, value]) => {
                 if (value !== undefined) {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
                     acc[key] = value
                 }
                 return acc
             }, {} as Partial<Family>)
 
-            const { id, ...updateData } = updates
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const {id, ...updateData} = updates
 
             updateData.memberCount = updateData.members?.length || 0
 
@@ -230,7 +252,7 @@ export default function FamilyList() {
                     </h3>
                 </div>
 
-                <div className="grid gap-4 overflow-y-auto min-h-[300px] pr-2">
+                <div className="grid gap-4 overflow-y-auto max-h-[300px] pr-2">
                     {filteredFamilies.map((family) => {
                         const status = getDonationStatus(family)
                         return (
@@ -256,10 +278,6 @@ export default function FamilyList() {
                                                 <div className="flex items-center gap-2">
                                                     <MapPin className="h-4 w-4 text-gray-400"/>
                                                     <span>{family.neighborhood}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Gift className="h-4 w-4 text-gray-400"/>
-                                                    <span>ID: {family.id.slice(-6)}</span>
                                                 </div>
                                             </div>
 
@@ -294,6 +312,8 @@ export default function FamilyList() {
                                                         responsibleName,
                                                         phone,
                                                         address,
+                                                        complemento,
+                                                        number,
                                                         neighborhood,
                                                         observations,
                                                         members,
@@ -305,6 +325,8 @@ export default function FamilyList() {
                                                         responsibleName,
                                                         phone,
                                                         address,
+                                                        complemento,
+                                                        number,
                                                         neighborhood,
                                                         observations,
                                                         members: [...(members || [])],
@@ -398,12 +420,18 @@ export default function FamilyList() {
                                             <Label>Telefone</Label>
                                             <Input
                                                 value={editingFamily.phone}
-                                                onChange={(e) =>
+                                                onChange={(e) => {
+                                                    const value = e.target.value.replace(/\D/g, '')
+                                                    const formattedValue = value
+                                                        .replace(/^(\d{2})(\d)/g, '($1) $2')
+                                                        .replace(/(\d{5})(\d)/, '$1-$2')
+                                                        .slice(0, 15)
                                                     setEditingFamily({
                                                         ...editingFamily,
-                                                        phone: e.target.value,
+                                                        phone: formattedValue,
                                                     })
-                                                }
+                                                }}
+                                                placeholder="(00) 00000-0000"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -431,6 +459,7 @@ export default function FamilyList() {
                                             />
                                         </div>
                                     </div>
+
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
                                             <Label>Membros da Família</Label>
@@ -450,9 +479,9 @@ export default function FamilyList() {
                                                     key={member.id}
                                                     className="flex items-center gap-4 p-3 bg-gray-50 rounded-md"
                                                 >
-                        <span className="text-sm text-gray-500">
-                            Membro {index + 1}
-                        </span>
+                                                    <span className="text-sm text-gray-500">
+                                                        Membro {index + 1}
+                                                    </span>
 
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2">
@@ -519,7 +548,9 @@ export default function FamilyList() {
                                 <>
                                     <div>
                                         <h4 className="font-semibold text-lg">{selectedFamily?.responsibleName}</h4>
-                                        <p className="text-gray-600">{selectedFamily?.memberCount} membros</p>
+                                        {selectedFamily.members?.length > 0 && (
+                                            <p className="text-gray-600">{selectedFamily?.memberCount} membros</p>
+                                        )}
                                     </div>
 
                                     <Separator/>
@@ -533,7 +564,7 @@ export default function FamilyList() {
                                         </div>
                                         <div>
                                             <h5 className="font-medium mb-2">Endereço</h5>
-                                            <p className="text-sm">{selectedFamily?.address}</p>
+                                            <p className="text-sm">{selectedFamily?.address}, {selectedFamily?.number}</p>
                                             <p className="text-sm">
                                                 {selectedFamily?.neighborhood}, {selectedFamily?.city}
                                             </p>
@@ -542,18 +573,23 @@ export default function FamilyList() {
 
                                     <Separator/>
 
-                                    <div>
-                                        <h5 className="font-medium mb-2">Membros da Família</h5>
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-[200px] overflow-y-auto pr-2">
-                                            {selectedFamily?.members.map((member, index) => (
-                                                <div key={member.id} className="text-sm p-2 bg-gray-50 rounded">
-                                                    Membro {index + 1}: {member.age} anos
+                                    {selectedFamily.members?.length > 0 && (
+                                        <>
+                                            <div>
+                                                <h5 className="font-medium mb-2">Membros da Família</h5>
+                                                <div
+                                                    className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-[200px] overflow-y-auto pr-2">
+                                                    {selectedFamily?.members.map((member, index) => (
+                                                        <div key={member.id} className="text-sm p-2 bg-gray-50 rounded">
+                                                            Membro {index + 1}: {member.age} anos
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </div>
+                                            </div>
 
-                                    <Separator/>
+                                            <Separator/>
+                                        </>
+                                    )}
 
                                     <div>
                                         <h5 className="font-medium mb-2">Histórico</h5>
@@ -582,6 +618,32 @@ export default function FamilyList() {
                     </Card>
                 </div>
             )}
+
+            <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Deseja realmente excluir a família de {familyToDelete?.responsibleName}?
+                            Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setOpenDeleteDialog(false)}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                        >
+                            Excluir
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

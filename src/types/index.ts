@@ -7,6 +7,8 @@ export interface Family {
   email?: string
   cep: string
   address: string
+  complemento: string
+  number: string
   neighborhood: string
   city: string
   state: string

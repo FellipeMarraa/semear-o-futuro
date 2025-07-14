@@ -5,7 +5,7 @@ import {signOut} from "firebase/auth"
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
-import {BarChart3, Gift, LogOut, Menu, Search, UserIcon, Users, X} from "lucide-react"
+import {BarChart3, Gift, LogOut, Menu, Search, Users, X} from "lucide-react"
 import {useToast} from "@/components/ui/use-toast.ts"
 import {auth} from "@/lib/firebase.ts"
 import FamilyRegistration from "@/components/family/family-registration.tsx"
@@ -26,6 +26,7 @@ export default function Dashboard() {
                 title: "Logout realizado com sucesso!",
                 description: "Até logo!",
             })
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             toast({
                 title: "Erro ao fazer logout",
@@ -45,10 +46,10 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
-            <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4 md:py-6">
-                        <div className="flex items-center">
+            <header className="bg-white shadow-sm border-b sticky top-0 z-50 max-h-20">
+                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 h-20">
+                    <div className="flex justify-between h-full p-6">
+                        <div className="flex items-center justify-center">
                             <button
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                                 className="md:hidden mr-2"
@@ -59,17 +60,13 @@ export default function Dashboard() {
                                     <Menu className="h-6 w-6" />
                                 )}
                             </button>
-                            <Users className="h-8 w-8 text-blue-600 mr-3 hidden sm:block" />
+                            <img src="public/semear.png" className="w-20 text-blue-600 mr-3 hidden sm:block"  alt="Logo"/>
                             <div>
                                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Sistema de Controle</h1>
                                 <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Gerenciamento de cadastros</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-4">
-                            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
-                                <UserIcon className="h-4 w-4" />
-                                <span>email</span>
-                            </div>
                             <Button variant="outline" size="sm" onClick={handleLogout}>
                                 <LogOut className="h-4 w-4 sm:mr-2" />
                                 <span className="hidden sm:inline">Sair</span>
@@ -94,7 +91,10 @@ export default function Dashboard() {
                     isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
-                <div className="p-4">
+                <div className="flex items-center justify-center mt-5 mb-0">
+                    <img src="public/semear.png" className="w-20 text-blue-600 mr-3"  alt="Logo"/>
+                </div>
+                <div className="p-4 mt-0">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -140,7 +140,7 @@ export default function Dashboard() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Cadastro de Famílias</CardTitle>
-                                <CardDescription>Registre novas famílias carentes no sistema</CardDescription>
+                                <CardDescription>Registre novas famílias no sistema</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <FamilyRegistration />
