@@ -233,6 +233,7 @@ export default function DonationHistory() {
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Data</TableHead>
+                                            <TableHead>Quantidade</TableHead>
                                             <TableHead>Observação</TableHead>
                                             <TableHead>Responsável pela Entrega</TableHead>
                                         </TableRow>
@@ -241,7 +242,14 @@ export default function DonationHistory() {
                                         {donations.map((donation) => (
                                             <TableRow key={donation.id}>
                                                 <TableCell
-                                                    className="font-medium">{formatDate(donation.date)}</TableCell>
+                                                    className="font-medium">{formatDate(donation.date)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {donation.quantity || (
+                                                        <span
+                                                            className="text-muted-foreground italic">Sem quantidade</span>
+                                                    )}
+                                                </TableCell>
                                                 <TableCell>
                                                     {donation.observations || (
                                                         <span
