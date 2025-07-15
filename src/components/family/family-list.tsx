@@ -252,7 +252,7 @@ export default function FamilyList() {
                     </h3>
                 </div>
 
-                <div className="grid gap-4 overflow-y-auto max-h-[300px] pr-2">
+                <div className="grid gap-4 overflow-y-auto max-h-full pr-2">
                     {filteredFamilies.map((family) => {
                         const status = getDonationStatus(family)
                         return (
