@@ -4,16 +4,42 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Users, Gift, AlertTriangle, Calendar, Package } from "lucide-react"
+import {Users, Gift, AlertTriangle, Calendar, Package, Trash} from "lucide-react"
 import { format, differenceInDays, startOfMonth, endOfMonth } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { subscribeFamilies, subscribeDonations } from "@/lib/firestore.ts"
 import type { Family, Donation } from "@/types"
+import {deleteDoc, doc} from "firebase/firestore";
+import {db} from "@/lib/firebase.ts";
+import {Button} from "@/components/ui/button.tsx";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog.tsx";
 
 export default function ReportsPanel() {
   const [families, setFamilies] = useState<Family[]>([])
   const [donations, setDonations] = useState<Donation[]>([])
   const [loading, setLoading] = useState(true)
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+  const [donationToDelete, setDonationToDelete] = useState<Donation | null>(null)
+
+  const confirmDelete = async () => {
+    if (!donationToDelete) return
+
+    try {
+      await deleteDoc(doc(db, "donations", donationToDelete.id))
+      setDonations((prev) => prev.filter((d) => d.id !== donationToDelete.id))
+      setOpenDeleteDialog(false)
+      setDonationToDelete(null)
+    } catch (error) {
+      console.error("Erro ao deletar doação:", error)
+    }
+  }
 
   useEffect(() => {
     const unsubscribeFamilies = subscribeFamilies((familiesData) => {
@@ -183,9 +209,21 @@ export default function ReportsPanel() {
                       <p className="text-xs text-gray-500">Por: {donation.responsible}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-500">{format(donation.date, "dd/MM", { locale: ptBR })}</p>
+                      <p className="text-xs text-gray-500">{format(donation.date, "dd/MM/yyyy", { locale: ptBR })}</p>
                     </div>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => {
+                          setDonationToDelete(donation)
+                          setOpenDeleteDialog(true)
+                        }}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </div>
+
                 ))
               ) : (
                 <p className="text-center text-gray-500 py-4">Nenhuma doação registrada ainda.</p>
@@ -252,6 +290,27 @@ export default function ReportsPanel() {
           </div>
         </CardContent>
       </Card>
+      <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja realmente excluir a doação feita por {donationToDelete?.responsible} para a família {donationToDelete?.familyName}? Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button variant="outline" onClick={() => setOpenDeleteDialog(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Excluir
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
+
+
   )
 }

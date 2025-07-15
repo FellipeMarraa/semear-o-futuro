@@ -5,7 +5,7 @@ import {signOut} from "firebase/auth"
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
-import {BarChart3, Gift, LogOut, Menu, Search, Users, X} from "lucide-react"
+import {BarChart3, Gift, LogOut, LucideHistory, Menu, Search, Users, X} from "lucide-react"
 import {useToast} from "@/components/ui/use-toast.ts"
 import {auth} from "@/lib/firebase.ts"
 import FamilyRegistration from "@/components/family/family-registration.tsx"
@@ -13,6 +13,7 @@ import DonationRegistration from "@/components/donation/donation-registration.ts
 import FamilyList from "@/components/family/family-list.tsx"
 import ReportsPanel from "@/components/reports/reports-panel.tsx"
 import {cn} from "@/lib/utils"
+import DonationHistory from "@/components/donation/donation-history.tsx";
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState("families")
@@ -40,6 +41,7 @@ export default function Dashboard() {
         { id: "families", label: "Famílias", icon: Users },
         { id: "donations", label: "Doações", icon: Gift },
         { id: "search", label: "Buscar", icon: Search },
+        { id: "history", label: "Histórico", icon: LucideHistory },
         { id: "reports", label: "Relatórios", icon: BarChart3 },
     ]
 
@@ -120,12 +122,12 @@ export default function Dashboard() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="md:block hidden">
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                        <TabsList className="grid w-full grid-cols-4">
+                        <TabsList className="grid w-full grid-cols-5">
                             {tabs.map((tab) => (
                                 <TabsTrigger
                                     key={tab.id}
                                     value={tab.id}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-2 cursor-pointer"
                                 >
                                     <tab.icon className="h-4 w-4" />
                                     {tab.label}
@@ -168,6 +170,18 @@ export default function Dashboard() {
                             </CardHeader>
                             <CardContent>
                                 <FamilyList />
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {activeTab === "history" && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Histórico de doações</CardTitle>
+                                <CardDescription>Visualize o histórico de doações realizadas</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <DonationHistory />
                             </CardContent>
                         </Card>
                     )}
