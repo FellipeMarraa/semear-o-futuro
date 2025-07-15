@@ -24,6 +24,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import {cn} from "@/lib/utils.ts";
+
 export default function DonationHistory() {
     const [families, setFamilies] = useState<Family[]>([])
     const [, setSelectedFamilyId] = useState<string>("")
@@ -106,7 +107,7 @@ export default function DonationHistory() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex flex-col gap-4">
-                        <div className="flex-1 py-1 space-y-2">
+                        <div className=" flex-1 py-1 space-y-2">
                             <Label htmlFor="family-select">Família</Label>
                             <Popover open={open} onOpenChange={setOpen}>
                                 <PopoverTrigger asChild>
@@ -114,20 +115,23 @@ export default function DonationHistory() {
                                         variant="outline"
                                         role="combobox"
                                         aria-expanded={open}
-                                        className="w-[300px] justify-between"
+                                        className="w-full max-w-96 justify-between"
                                     >
-                                        {value
-                                            ? (() => {
-                                                const family = families.find((f) => f.id === value)
-                                                return family
-                                                    ? `${family.responsibleName} (${family.neighborhood})`
-                                                    : "Selecione uma família"
-                                            })()
-                                            : "Selecione uma família"}
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        <span className="truncate max-w-[85%] text-left">
+                                          {value
+                                              ? (() => {
+                                                  const family = families.find((f) => f.id === value)
+                                                  return family
+                                                      ? `${family.responsibleName} (${family.neighborhood})`
+                                                      : "Selecione uma família"
+                                              })()
+                                              : "Selecione uma família"}
+                                        </span>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-[300px] p-0">
+
+                                <PopoverContent className="w-full p-0">
                                     <Command
                                         filter={(value, search) => {
                                             const family = families.find((f) => f.id === value)
@@ -136,7 +140,7 @@ export default function DonationHistory() {
                                             return text.includes(search.toLowerCase()) ? 1 : 0
                                         }}
                                     >
-                                        <CommandInput placeholder="Buscar por nome ou bairro..." className="h-9" />
+                                        <CommandInput placeholder="Buscar por nome ou bairro..." className="h-9"/>
                                         <CommandList>
                                             <CommandEmpty>Nenhuma família encontrada.</CommandEmpty>
                                             <CommandGroup>
@@ -151,7 +155,8 @@ export default function DonationHistory() {
                                                         }}
                                                     >
                                                         <div className="flex flex-col">
-                                                            <span className="font-medium">{family.responsibleName}</span>
+                                                            <span
+                                                                className="font-medium">{family.responsibleName}</span>
                                                             <span className="text-sm text-muted-foreground">
                                                               {family.neighborhood} • {family.memberCount} membros
                                                             </span>
@@ -169,8 +174,6 @@ export default function DonationHistory() {
                                     </Command>
                                 </PopoverContent>
                             </Popover>
-
-
                         </div>
                     </div>
 
@@ -194,66 +197,67 @@ export default function DonationHistory() {
             </Card>
 
             {/* Histórico de Doações */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Package className="h-5 w-5"/>
-                            Histórico de Doações
-                        </CardTitle>
-                        <CardDescription>Histórico completo de doações
-                            para {selectedFamily?.responsibleName}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {loading ? (
-                            <div className="flex items-center justify-center py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                                <span className="ml-2">Carregando histórico...</span>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Package className="h-5 w-5"/>
+                        Histórico de Doações
+                    </CardTitle>
+                    <CardDescription>Histórico completo de doações
+                        para {selectedFamily?.responsibleName}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {loading ? (
+                        <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <span className="ml-2">Carregando histórico...</span>
+                        </div>
+                    ) : donations.length === 0 ? (
+                        <div className="text-center py-8">
+                            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4"/>
+                            <p className="text-muted-foreground">Nenhuma doação encontrada para esta família.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="flex flex-col items-center gap-4 text-sm text-muted-foreground">
+                                <Badge variant="secondary" className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3"/>
+                                    {donations.length} doação(ões) registrada(s)
+                                </Badge>
+                                {selectedFamily?.lastDonation &&
+                                    <span>Última doação: {formatDate(selectedFamily?.lastDonation)}</span>}
                             </div>
-                        ) : donations.length === 0 ? (
-                            <div className="text-center py-8">
-                                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4"/>
-                                <p className="text-muted-foreground">Nenhuma doação encontrada para esta família.</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                    <Badge variant="secondary" className="flex items-center gap-1">
-                                        <Calendar className="h-3 w-3"/>
-                                        {donations.length} doação(ões) registrada(s)
-                                    </Badge>
-                                    {selectedFamily?.lastDonation &&
-                                        <span>Última doação: {formatDate(selectedFamily?.lastDonation)}</span>}
-                                </div>
 
-                                <div className="rounded-md border h-full max-h-80 overflow-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Data</TableHead>
-                                                <TableHead>Observação</TableHead>
-                                                <TableHead>Responsável pela Entrega</TableHead>
+                            <div className="rounded-md border h-full max-h-80 overflow-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Data</TableHead>
+                                            <TableHead>Observação</TableHead>
+                                            <TableHead>Responsável pela Entrega</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {donations.map((donation) => (
+                                            <TableRow key={donation.id}>
+                                                <TableCell
+                                                    className="font-medium">{formatDate(donation.date)}</TableCell>
+                                                <TableCell>
+                                                    {donation.observations || (
+                                                        <span
+                                                            className="text-muted-foreground italic">Sem observação</span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>{donation.responsible}</TableCell>
                                             </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {donations.map((donation) => (
-                                                <TableRow key={donation.id}>
-                                                    <TableCell
-                                                        className="font-medium">{formatDate(donation.date)}</TableCell>
-                                                    <TableCell>
-                                                        {donation.observations || (
-                                                            <span className="text-muted-foreground italic">Sem observação</span>
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell>{donation.responsible}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             </div>
-                        )}
-                    </CardContent>
-                </Card>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     )
 }

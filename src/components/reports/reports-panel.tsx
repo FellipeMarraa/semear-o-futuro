@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import {Users, Gift, AlertTriangle, Calendar, Package, Trash} from "lucide-react"
 import { format, differenceInDays, startOfMonth, endOfMonth } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { subscribeFamilies, subscribeDonations } from "@/lib/firestore.ts"
+import { subscribeFamilies, subscribeDonations, recalculateLastDonationForFamily } from "@/lib/firestore.ts"
 import type { Family, Donation } from "@/types"
 import {deleteDoc, doc} from "firebase/firestore";
 import {db} from "@/lib/firebase.ts";
@@ -33,13 +33,18 @@ export default function ReportsPanel() {
 
     try {
       await deleteDoc(doc(db, "donations", donationToDelete.id))
+
       setDonations((prev) => prev.filter((d) => d.id !== donationToDelete.id))
+
+      await recalculateLastDonationForFamily(donationToDelete.familyId)
+
       setOpenDeleteDialog(false)
       setDonationToDelete(null)
     } catch (error) {
       console.error("Erro ao deletar doação:", error)
     }
   }
+
 
   useEffect(() => {
     const unsubscribeFamilies = subscribeFamilies((familiesData) => {
@@ -202,7 +207,7 @@ export default function ReportsPanel() {
             <div className="space-y-4">
               {recentDonations.length > 0 ? (
                 recentDonations.map((donation, index) => (
-                  <div key={index} className="flex items-start justify-between p-3 border rounded-lg">
+                  <div key={index} className="flex h-full items-center justify-between p-3 border rounded-lg">
                     <div className="space-y-1">
                       <p className="font-medium text-sm">{donation.familyName}</p>
                       <p className="text-sm text-gray-600">{donation.donationType}</p>

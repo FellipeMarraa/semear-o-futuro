@@ -118,6 +118,21 @@ export const getDonationsByFamily = async (familyId: string): Promise<Donation[]
   }
 }
 
+export const recalculateLastDonationForFamily = async (familyId: string) => {
+  try {
+    const donations = await getDonationsByFamily(familyId)
+
+    const latestDonation = donations[0]
+
+    await updateFamily(familyId, {
+      lastDonation: latestDonation?.date || null,
+    })
+  } catch (error) {
+    console.error("Erro ao recalcular última doação:", error)
+  }
+}
+
+
 // Funções de busca e filtros
 export const searchFamilies = async (searchTerm: string): Promise<Family[]> => {
   try {
