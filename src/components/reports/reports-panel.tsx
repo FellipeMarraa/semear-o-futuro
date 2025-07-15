@@ -35,10 +35,10 @@ export default function ReportsPanel() {
       await deleteDoc(doc(db, "donations", donationToDelete.id))
 
       setDonations((prev) => prev.filter((d) => d.id !== donationToDelete.id))
+      setOpenDeleteDialog(false)
 
       await recalculateLastDonationForFamily(donationToDelete.familyId)
 
-      setOpenDeleteDialog(false)
       setDonationToDelete(null)
     } catch (error) {
       console.error("Erro ao deletar doação:", error)
